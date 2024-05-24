@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingredients Info</title>
+</head>
+<body>
+    <h1>Ingredients Information</h1>
+    <input type="text" id="searchInput" placeholder="Search for an ingredient...">
+    <button onclick="searchIngredient()">Search</button>
+    <div id="result"></div>
+
+    <script>
+        function searchIngredient() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            fetch('https://spreadsheets.google.com/feeds/list/https://docs.google.com/spreadsheets/d/e/2PACX-1vTn_T5ZBA2dDmfU5Ems-qYZtPg2BP2Jwq5XJhD5ZU8OlhOOpEbMGlLYIBL8Y-IB2IPlmPOUY-peHHN1/pubhtml/od6/public/values?alt=json')
+                .then(response => response.json())
+                .then(data => {
+                    const entries = data.feed.entry;
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = '';
+                    let found = false;
+
+                    entries.forEach(entry => {
+                        if (entry.gsx$ingredientname.$t.toLowerCase() === searchInput) {
+                            found = true;
+                            resultDiv.innerHTML = `
+                                <h2>${entry.gsx$ingredientname.$t}</h2>
+                                <p><strong>Description:</strong> ${entry.gsx$description.$t}</p>
+                                <p><strong>Nutritional Information:</strong> ${entry.gsx$nutritionalinformation.$t}</p>
+                            `;
+                        }
+                    });
+
+                    if (!found) {
+                        resultDiv.innerHTML = '<p>Ingredient not found.</p>';
+                    }
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+    </script>
+</body>
+</html>
